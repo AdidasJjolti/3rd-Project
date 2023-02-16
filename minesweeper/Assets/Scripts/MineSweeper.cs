@@ -24,6 +24,8 @@ public class MineSweeper : MonoBehaviour
     [SerializeField] List<GameObject> _buttonList = new List<GameObject>();
     [SerializeField] Transform _buttonParent;
     [SerializeField] List<int> _map = new List<int>();
+    [SerializeField] List<bool> _openMap = new List<bool>();
+
 
     const int _mines = 10;
 
@@ -71,10 +73,12 @@ public class MineSweeper : MonoBehaviour
     void CreateMap(List<int> mineList)
     {
         _map.Clear();
+        _openMap.Clear();
 
         for (int i = 0; i < (_row * _col); i++)
         {
             _map.Add((int)_cellType.ZERO);
+            _openMap.Add(false);
 
             if (mineList.Contains(i))
             {
@@ -95,5 +99,18 @@ public class MineSweeper : MonoBehaviour
         }
 
         Debug.Log(debugMap);
+    }
+
+    void Search(int index)
+    {
+        if(index < 0 || index >= (_col * _row))
+        {
+            return;
+        }
+
+        if(_openMap[index])
+        {
+            return;
+        }
     }
 }

@@ -1,0 +1,92 @@
+_button[i] 주변 지뢰 탐색 방법
+
+오픈한 버튼인지 확인하기 위한 멤버 변수 bool _isOpened 설정
+지뢰 카운트를 저장하기 위한 멤버 / 지역 변수 int mineCount = 0 설정
+
+
+- 8방향 탐색 기본 로직
+  1) 좌상단 인덱스 : i - (_col - 1)
+  2) 상단 인덱스 : i - _col
+  3) 우상단 인덱스 : i - (_col + 1)
+  4) 좌측 인덱스 : i - 1
+  5) 우측 인덱스 : i + 1
+  6) 좌하단 인덱스 : i + (_col - 1)
+  7) 하단 인덱스 : i + _col
+  8) 우하단 인덱스 : i + (_col + 1)
+
+
+- 지뢰 탐색 불가 조건
+  1) 탐색 버튼 인덱스 위치에 따른 불가 조건
+     (1) 첫번째 열에 위치한 버튼은 좌상단, 좌측, 좌하단 탐색 불가 : i%_col == 0         (1, 4, 6 불가)
+     (2) 마지막 열에 위치한 버튼은 우상단, 우측, 우하단 탐색 불가 : i%_col == 8         (3, 5, 8 불가)
+     (3) 첫번째 행에 위치한 버튼은 좌상단, 상단, 우상단 탐색 불가 : i/_row == 0         (1, 2, 3 불가)
+     (4) 마지막 행에 위치한 버튼은 좌하단, 하단, 우하단 탐색 불가 : i/_row == 8         (6, 7, 8 불가)
+
+
+
+
+* 사전 탐색 조건
+
+// 지뢰 탐색 불가 조건 1)에 걸리면 함수 실행하지 않음 return
+// bool값으로 만든 9*9 리스트 생성(_openMap), 인덱스로 찾았을 때 열린 버튼(true)이면 함수 실행하지 않음 return
+// 찾으려는 인덱스에는 _openMap[index] = true 할당
+// _map[index] == _cellType.Mine이고 _openMap[index] == true이면 게임 오버(_isGameOver = true)하고 return
+
+* 탐색 시작
+// 주변 지뢰 카운트를 저장할 지역 변수(int mineCount = int CountMine(index)) 설정, int CountMine(index) 함수 만들기
+// CountMine(index) 함수 안에 반환할 int 지역 변수 사용, for문 돌면서 지뢰 탐색
+
+// mineCount == 0 이면, 8방향 탐색
+     if(mineCount == 0)
+           {
+		Search(i - (_col - 1));
+		Search(i - _col);
+		...
+		Search(i + (_col + 1));
+		return;
+           }
+
+
+
+
+Search(index)
+{
+     if(index < 0 || index >= (_col * _row) || index%_col <= 0 || index%_col >= (_col - 1) || index/_row <= 0 || index/_row >= (_row -1))
+	{
+	   return;
+	}
+
+     if(_openMap[index] == true)
+	{
+	   return;
+	}
+
+     _isOpened = true;
+
+     if(_map[index] == (int)_cellType.Mine)
+	{
+	   return;
+	}
+
+
+
+     Search(index - (_col - 1));
+
+
+
+
+     // 탐색 결과 주변 지뢰가 없으면 실행
+     if(mineCount == 0)
+           {
+		Search(i - (_col - 1));
+		Search(i - _col);
+		...
+		Search(i + (_col + 1));
+		return;
+           }
+}
+
+
+CountMine
+
+
