@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 enum _cellType
 {
@@ -29,6 +31,8 @@ public class MineSweeper : MonoBehaviour
 
     const int _mines = 10;
 
+    private bool _isGameOver;
+
     void Awake()
     {
 
@@ -50,6 +54,10 @@ public class MineSweeper : MonoBehaviour
             objButton.transform.parent = _buttonParent;
             objButton.transform.name = $"button[{i}]";
             _buttonList.Add(objButton);
+            objButton.GetComponent<Button>().onClick.AddListener(() => 
+            {
+                Search(_buttonList.IndexOf(objButton), _buttonList.IndexOf(objButton));
+            });
         }
     }
 
@@ -101,9 +109,19 @@ public class MineSweeper : MonoBehaviour
         Debug.Log(debugMap);
     }
 
-    void Search(int index)
+    void Search(int origin, int index)
     {
         if(index < 0 || index >= (_col * _row))
+        {
+            return;
+        }
+
+        // origin 좌우로 나올 수 있는 최소, 최대 나머지 값을 각각 min, max로 정의
+        // origin이 1인 경우, min 값은 0, max 값은 2
+        int min = (origin % _col) - 1 < 0 ? 0 : (origin % _col) - 1;
+        int max = (origin % _col) + 1 > _col - 1 ? _col - 1 : (origin % _col) + 1;
+
+        if(index % _col < min || index % _col > max)
         {
             return;
         }
@@ -112,5 +130,74 @@ public class MineSweeper : MonoBehaviour
         {
             return;
         }
+
+        _openMap[index] = true;
+
+        // Todo : 열린 버튼이 지뢰일 때 게임 오버 처리하는 부분 체크
+
+        if (_map[index] == (int)_cellType.MINE && _openMap[index] == true)
+        {
+            _isGameOver = true;
+            Debug.Log("Game Over");
+            return;
+        }
+
+        _buttonList[index].GetComponent<Button>().interactable = false;
+        int mineCount = CountMine(origin, index);
+
+
+        if (mineCount == 0)
+        {
+            origin = index;
+
+            Search(origin, index - (_col - 1));
+            Search(origin, index - _col);
+            Search(origin, index - (_col + 1));
+            Search(origin, index - 1);
+            Search(origin, index + 1);
+            Search(origin, index + (_col - 1));
+            Search(origin, index + _col);
+            Search(origin, index + (_col + 1));
+        }
+        else
+        {
+            TextMeshProUGUI mineText = _buttonList[index].GetComponentInChildren<TextMeshProUGUI>();
+            mineText.SetText(mineCount.ToString());
+            mineText.color = new Color(mineText.color.r, mineText.color.g, mineText.color.b, 1);
+        }
+    }
+
+    // 찾으려는 버튼 번호(index) 기준으로 8방향 + 자기자신을 탐색하는 함수 CountMine
+    int CountMine(int origin, int index)
+    {
+        int mineResult = 0;
+
+        for (int i = -1; i <= 1; i++)
+        {
+            for (int j = -1; j <= 1; j++)
+            {
+                int target = index + i * _row + j;
+
+                if (target < 0 || target >= (_col * _row))
+                {
+                    continue;
+                }
+
+                int min = (origin % _col) - 1 < 0 ? 0 : (origin % _col) - 1;
+                int max = (origin % _col) + 1 > _col - 1 ? _col - 1 : (origin % _col) + 1;
+
+                if (max < target % _col || min > target % _col)
+                {
+                    continue;
+                }
+
+                if(_map[target] == (int)_cellType.MINE)
+                {
+                    mineResult += 1;
+                }
+            }
+        }
+
+        return mineResult;
     }
 }
