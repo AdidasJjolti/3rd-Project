@@ -111,7 +111,12 @@ public class MineSweeper : MonoBehaviour
 
     void Search(int origin, int index)
     {
-        if(index < 0 || index >= (_col * _row))
+        if (_isGameOver == true)
+        {
+            return;
+        }
+
+        if (index < 0 || index >= (_col * _row))
         {
             return;
         }
@@ -131,19 +136,29 @@ public class MineSweeper : MonoBehaviour
             return;
         }
 
-        _openMap[index] = true;
+        if (_map[index] != (int)_cellType.MINE || (_map[index] == (int)_cellType.MINE && origin == index))
+        {
+            _openMap[index] = true;
+        }
 
-        // Todo : 열린 버튼이 지뢰일 때 게임 오버 처리하는 부분 체크
+        // 직접 누르지 않은 버튼이 지뢰일 때
+        if(_openMap[index] == false)
+        {
+            return;
+        }
+
+        // Todo : 열린 버튼이 지뢰일 때 게임 오버 처리하는 부분 체크, 지뢰 위치 모두 공개하는 함수 추가
 
         if (_map[index] == (int)_cellType.MINE && _openMap[index] == true)
         {
             _isGameOver = true;
-            Debug.Log("Game Over");
+            Debug.LogError("Game Over" + " ,Origin : " + origin + " , Index : " + index);
             return;
         }
 
         _buttonList[index].GetComponent<Button>().interactable = false;
         int mineCount = CountMine(origin, index);
+        Debug.Log("MineCount : " + mineCount + " ,Origin : "+ origin + " , Index : " + index);         // 자기 주위 8칸의 지뢰 갯수를 표시하는 로그
 
 
         if (mineCount == 0)
@@ -151,13 +166,21 @@ public class MineSweeper : MonoBehaviour
             origin = index;
 
             Search(origin, index - (_col - 1));
+            //Debug.Log("Upper Left Searched, Origin is : " + origin);
             Search(origin, index - _col);
+            //Debug.Log("Top Searched, Origin is : " + origin);
             Search(origin, index - (_col + 1));
+            //Debug.Log("Upper Right Searched, Origin is : " + origin);
             Search(origin, index - 1);
+            //Debug.Log("Left Searched, Origin is : " + origin);
             Search(origin, index + 1);
+            //Debug.Log("Right Searched, Origin is : " + origin);
             Search(origin, index + (_col - 1));
+            //Debug.Log("Lower Left Searched, Origin is : " + origin);
             Search(origin, index + _col);
+            //Debug.Log("Down Searched, Origin is : " + origin);
             Search(origin, index + (_col + 1));
+            //Debug.Log("Lower Right Searched, Origin is : " + origin);
         }
         else
         {
@@ -176,15 +199,16 @@ public class MineSweeper : MonoBehaviour
         {
             for (int j = -1; j <= 1; j++)
             {
-                int target = index + i * _row + j;
+                int target = index + i * _row + j;              // 탐색하려는 버튼 위치  좌상단(-1, -1) ~ 우하단(1, 1)
 
-                if (target < 0 || target >= (_col * _row))
+                if (target < 0 || target >= (_col * _row))      // 탐색하려는 버튼 위치가 0보다 작거나 80번을 넘어가면 스킵
                 {
                     continue;
                 }
 
-                int min = (origin % _col) - 1 < 0 ? 0 : (origin % _col) - 1;
-                int max = (origin % _col) + 1 > _col - 1 ? _col - 1 : (origin % _col) + 1;
+
+                int min = (index % _col) - 1 < 0 ? 0 : (index % _col) - 1;
+                int max = (index % _col) + 1 > _col - 1 ? _col - 1 : (index % _col) + 1;
 
                 if (max < target % _col || min > target % _col)
                 {

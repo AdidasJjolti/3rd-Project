@@ -629,7 +629,7 @@ MonoBehaviour:
   m_UiScaleMode: 0
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 3840, y: 2160}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -1020,7 +1020,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _button: {fileID: 3394160617771811196, guid: 98383b532b84beb4994ccd317c2cb8bf, type: 3}
+  _buttonList: []
   _buttonParent: {fileID: 1035695136}
+  _map: 
+  _openMap: 
 --- !u!4 &1686062239
 Transform:
   m_ObjectHideFlags: 0
