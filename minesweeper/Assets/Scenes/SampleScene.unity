@@ -181,7 +181,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 00:00
+  m_text: 000
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1024,6 +1024,14 @@ MonoBehaviour:
   _buttonParent: {fileID: 1035695136}
   _map: 
   _openMap: 
+  _timerText: {fileID: 231421177}
+  _mineCountText: {fileID: 847924852}
+  _faceSprites:
+  - {fileID: -583474885, guid: 3adf72160cdc8d547a544541e7d38bcd, type: 3}
+  - {fileID: -1656729561, guid: 3adf72160cdc8d547a544541e7d38bcd, type: 3}
+  - {fileID: -1377834052, guid: 3adf72160cdc8d547a544541e7d38bcd, type: 3}
+  - {fileID: 582042270, guid: 3adf72160cdc8d547a544541e7d38bcd, type: 3}
+  _faceImage: {fileID: 1881056517}
 --- !u!4 &1686062239
 Transform:
   m_ObjectHideFlags: 0
@@ -1251,7 +1259,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: ea94bf81a05016c4e87c07d6d1ff49bd, type: 3}
+  m_Sprite: {fileID: -583474885, guid: 3adf72160cdc8d547a544541e7d38bcd, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 
 enum _cellType
@@ -18,6 +19,7 @@ enum _cellType
     EIGHT
 }
 
+
 public class MineSweeper : MonoBehaviour
 {
     const int _row = 9;
@@ -27,21 +29,34 @@ public class MineSweeper : MonoBehaviour
     [SerializeField] Transform _buttonParent;
     [SerializeField] List<int> _map = new List<int>();
     [SerializeField] List<bool> _openMap = new List<bool>();
+    [SerializeField] TextMeshProUGUI _timerText;
+    float _curTime;
+    bool _isFirstClick;
+    [SerializeField] TextMeshProUGUI _mineCountText;
+    [SerializeField] Sprite[] _faceSprites;
+    [SerializeField] Image _faceImage;
 
-
-    const int _mines = 10;
+    const int _mines = 50;
 
     private bool _isGameOver;
 
     void Awake()
     {
-
+        _curTime = 0f;
+        _isFirstClick = false;
+        _mineCountText.text = _mines.ToString();
+        _faceImage.sprite = _faceSprites[0];
     }
 
     void Start()
     {
         CreateButtons();
         SetMines();
+    }
+
+    void Update()
+    {
+        SetTimerUI();
     }
 
     void CreateButtons()
@@ -57,7 +72,10 @@ public class MineSweeper : MonoBehaviour
             objButton.GetComponent<Button>().onClick.AddListener(() => 
             {
                 Search(_buttonList.IndexOf(objButton), _buttonList.IndexOf(objButton));
+                _isFirstClick = true;
             });
+
+            //objButton.GetComponent<Button>()
         }
     }
 
@@ -152,6 +170,7 @@ public class MineSweeper : MonoBehaviour
         if (_map[index] == (int)_cellType.MINE && _openMap[index] == true)
         {
             _isGameOver = true;
+            Time.timeScale = 0f;
             Debug.LogError("Game Over" + " ,Origin : " + origin + " , Index : " + index);
             return;
         }
@@ -186,8 +205,33 @@ public class MineSweeper : MonoBehaviour
         {
             TextMeshProUGUI mineText = _buttonList[index].GetComponentInChildren<TextMeshProUGUI>();
             mineText.SetText(mineCount.ToString());
-            mineText.color = new Color(mineText.color.r, mineText.color.g, mineText.color.b, 1);
+
+            switch (mineCount)
+            {
+                case 1:
+                    SetHexToColor("#0000FF", mineText);
+                    break;
+                case 2:
+                    SetHexToColor("#44FD44", mineText);
+                    break;
+                case 3:
+                    SetHexToColor("#FF0000", mineText);
+                    break;
+                case 4:
+                    SetHexToColor("#000080", mineText);
+                    break;
+                default:
+                    SetHexToColor("#800000", mineText);
+                    break;
+            }
         }
+    }
+
+    public void SetHexToColor(string hexadecimal, TextMeshProUGUI text)
+    {
+        Color hexColor;
+        ColorUtility.TryParseHtmlString(hexadecimal, out hexColor);
+        text.color = hexColor;
     }
 
     // 찾으려는 버튼 번호(index) 기준으로 8방향 + 자기자신을 탐색하는 함수 CountMine
@@ -223,5 +267,20 @@ public class MineSweeper : MonoBehaviour
         }
 
         return mineResult;
+    }
+
+    void SetTimerUI()
+    {
+        if(_isFirstClick == false)
+        {
+            return;
+        }
+        _curTime += Time.deltaTime;
+        _timerText.text = string.Format($"{_curTime:000}");
+    }
+
+    public void ChangeFaceSprite()
+    {
+        
     }
 }
