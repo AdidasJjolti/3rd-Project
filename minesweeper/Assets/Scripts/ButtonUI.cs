@@ -6,26 +6,22 @@ using UnityEngine;
 public class ButtonUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
     bool _onPress;
+    GameObject target;      // 메시지를 전달할 게임 오브젝트 : minesweeper
 
     public void OnPointerDown(PointerEventData eventData)
     {
         _onPress = true;
+        target.SendMessage("ChangeFaceSprite", _onPress);
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
         _onPress = false;
+        target.SendMessage("ChangeFaceSprite", _onPress);
     }
 
-    // Start is called before the first frame update
-    void Start()
+    public void SetTarget(GameObject minesweeper)
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        target = minesweeper;
     }
 }

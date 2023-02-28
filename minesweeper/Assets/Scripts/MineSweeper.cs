@@ -66,6 +66,7 @@ public class MineSweeper : MonoBehaviour
         for (int i = 0; i < (_row * _col); i++)
         {
             GameObject objButton = Instantiate(_button);
+            objButton.GetComponent<ButtonUI>().SetTarget(gameObject);
             objButton.transform.parent = _buttonParent;
             objButton.transform.name = $"button[{i}]";
             _buttonList.Add(objButton);
@@ -279,8 +280,15 @@ public class MineSweeper : MonoBehaviour
         _timerText.text = string.Format($"{_curTime:000}");
     }
 
-    public void ChangeFaceSprite()
+    public void ChangeFaceSprite(bool onPress)
     {
-        
+        if (onPress == true)
+        {
+            _faceImage.sprite = _faceSprites[1];
+        }
+        else
+        {
+            _faceImage.sprite = _faceSprites[0];
+        }
     }
 }
