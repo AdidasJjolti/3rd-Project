@@ -7,6 +7,7 @@ using TMPro;
 
 enum _cellType
 {
+    FLAG = -2,
     MINE = -1,
     ZERO,
     ONE,
@@ -22,21 +23,26 @@ enum _cellType
 
 public class MineSweeper : MonoBehaviour
 {
-    const int _row = 9;
-    const int _col = 9;
+    int _row = 9;
+    int _col = 9;
+    int _mines = 20;
+    int _flags;
+
     [SerializeField] GameObject _button;
     [SerializeField] List<GameObject> _buttonList = new List<GameObject>();
     [SerializeField] Transform _buttonParent;
     [SerializeField] List<int> _map = new List<int>();
     [SerializeField] List<bool> _openMap = new List<bool>();
+    [SerializeField] List<bool> _flagMap = new List<bool>();
     [SerializeField] TextMeshProUGUI _timerText;
     float _curTime;
     bool _isFirstClick;
     [SerializeField] TextMeshProUGUI _mineCountText;
     [SerializeField] Sprite[] _faceSprites;
     [SerializeField] Image _faceImage;
-
-    const int _mines = 50;
+    bool _toggleState;
+    [SerializeField] GameObject _flagToggle;
+    [SerializeField] GameObject _difficultyToggle;
 
     private bool _isGameOver;
 
@@ -44,19 +50,21 @@ public class MineSweeper : MonoBehaviour
     {
         _curTime = 0f;
         _isFirstClick = false;
-        _mineCountText.text = _mines.ToString();
         _faceImage.sprite = _faceSprites[0];
     }
 
     void Start()
     {
-        CreateButtons();
-        SetMines();
+        SetNewGame((eDifficultyType.EASY,(-1,-1,-1)));
     }
 
     void Update()
     {
         SetTimerUI();
+        if(_flagMap.Count >0)
+        {
+            Debug.Log(_flagMap[0]);
+        }
     }
 
     void CreateButtons()
@@ -66,31 +74,58 @@ public class MineSweeper : MonoBehaviour
         for (int i = 0; i < (_row * _col); i++)
         {
             GameObject objButton = Instantiate(_button);
+            if(_map[i] == (int)_cellType.MINE)
+            {
+                ColorBlock cb = objButton.GetComponent<Button>().colors;
+                cb.normalColor = new Color(1, 0, 0);
+                objButton.GetComponent<Button>().colors = cb;
+            }
             objButton.GetComponent<ButtonUI>().SetTarget(gameObject);
             objButton.transform.parent = _buttonParent;
             objButton.transform.name = $"button[{i}]";
             _buttonList.Add(objButton);
             objButton.GetComponent<Button>().onClick.AddListener(() => 
             {
-                Search(_buttonList.IndexOf(objButton), _buttonList.IndexOf(objButton));
+                CheckFlagToggle();
+
+                // flagToggle 상태를 체크하고 search 또는 addFlag 실행
+                if (_toggleState == true)
+                {
+                    if(_flagMap[_buttonList.IndexOf(objButton)] == false)
+                    {
+                        AddFlag(_buttonList.IndexOf(objButton));
+                    }
+                    else
+                    {
+                        RemoveFlag(_buttonList.IndexOf(objButton));
+                    }
+                    _mineCountText.text = _flags.ToString();
+                }
+                else if (_toggleState == false && _flagMap[_buttonList.IndexOf(objButton)] == true)
+                {
+                    return;
+                }
+                else
+                {
+                    Search(_buttonList.IndexOf(objButton), _buttonList.IndexOf(objButton));
+                }
                 _isFirstClick = true;
             });
-
-            //objButton.GetComponent<Button>()
         }
     }
 
     void SetMines()
     {
+        _flags = _mines;
+        _mineCountText.text = _flags.ToString();
         List<int> mineNumber = new List<int>();
-
         while(mineNumber.Count < _mines)
         {
             int mine = Random.Range(0, _row * _col);
             if(mineNumber.Contains(mine) == false)
             {
                 mineNumber.Add(mine);
-                Debug.Log(mine);
+                //Debug.Log(mine);
             }
         }
 
@@ -101,11 +136,13 @@ public class MineSweeper : MonoBehaviour
     {
         _map.Clear();
         _openMap.Clear();
+        _flagMap.Clear();
 
         for (int i = 0; i < (_row * _col); i++)
         {
             _map.Add((int)_cellType.ZERO);
             _openMap.Add(false);
+            _flagMap.Add(false);
 
             if (mineList.Contains(i))
             {
@@ -177,8 +214,8 @@ public class MineSweeper : MonoBehaviour
         }
 
         _buttonList[index].GetComponent<Button>().interactable = false;
-        int mineCount = CountMine(origin, index);
-        Debug.Log("MineCount : " + mineCount + " ,Origin : "+ origin + " , Index : " + index);         // 자기 주위 8칸의 지뢰 갯수를 표시하는 로그
+        int mineCount = CountMine(index);
+        //Debug.Log("MineCount : " + mineCount + " ,Origin : "+ origin + " , Index : " + index);         // 자기 주위 8칸의 지뢰 갯수를 표시하는 로그
 
 
         if (mineCount == 0)
@@ -236,7 +273,7 @@ public class MineSweeper : MonoBehaviour
     }
 
     // 찾으려는 버튼 번호(index) 기준으로 8방향 + 자기자신을 탐색하는 함수 CountMine
-    int CountMine(int origin, int index)
+    int CountMine(int index)
     {
         int mineResult = 0;
 
@@ -290,5 +327,65 @@ public class MineSweeper : MonoBehaviour
         {
             _faceImage.sprite = _faceSprites[0];
         }
+    }
+
+    // FlagToggle로 토글 상태를 요청하는 함수
+    public void CheckFlagToggle()
+    {
+        _flagToggle.SendMessage("SendToggleState");
+    }
+
+    // FlagToggle에서 토글 상태 받아오는 함수
+    public void ReceiveFlagToggle(bool flagToggleState)
+    {
+        _toggleState = flagToggleState;
+    }
+
+    // FlagToggle이 on 상태일 때 onClick 이벤트로 깃발 아이콘을 표시할 함수
+    public void AddFlag(int index)
+    {
+        _buttonList[index].SendMessage("SetFlag");
+        _flagMap[index] = true;
+        if (_flags <= 0)
+        {
+            return;
+        }
+        _flags--;
+    }
+
+    public void RemoveFlag(int index)
+    {
+        _buttonList[index].SendMessage("SetFlag");
+        _flagMap[index] = false;
+        _flags++;
+    }
+
+    public void SetNewGame((eDifficultyType difficulty, (int col, int row, int mine)info)data)
+    {
+        switch(data.difficulty)
+        {
+            case eDifficultyType.EASY:
+                _row = 9;
+                _col = 9;
+                _mines = 10;
+                break;
+            case eDifficultyType.NORMAL:
+                _row = 16;
+                _col = 16;
+                _mines = 40;
+                break;
+            case eDifficultyType.HARD:
+                _row = 16;
+                _col = 30;
+                _mines = 99;
+                break;
+            case eDifficultyType.CUSTOM:          
+                _row = data.info.row;
+                _col = data.info.col;
+                _mines = data.info.mine;
+                break;
+        }
+        SetMines();
+        CreateButtons();
     }
 }
