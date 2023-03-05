@@ -44,6 +44,8 @@ public class MineSweeper : MonoBehaviour
     [SerializeField] GameObject _flagToggle;
     [SerializeField] GameObject _difficultyToggle;
 
+    [SerializeField] Image _buttonBackGround;
+
     private bool _isGameOver;
 
     void Awake()
@@ -69,6 +71,11 @@ public class MineSweeper : MonoBehaviour
 
     void CreateButtons()
     {
+        for(int i = _buttonList.Count - 1; i >= 0; i--)
+        {
+            Destroy(_buttonList[i]);
+        }
+
         _buttonList.Clear();
 
         for (int i = 0; i < (_row * _col); i++)
@@ -385,7 +392,15 @@ public class MineSweeper : MonoBehaviour
                 _mines = data.info.mine;
                 break;
         }
+        SetBackgroundSize(_row, _col);
         SetMines();
         CreateButtons();
+    }
+
+    // width = left padding + right padding + (buttons - 1) * spacing + buttons * buttonsize
+    // height = top padding + down padding + (buttons - 1) * spacing + buttons * buttonsize
+    public void SetBackgroundSize(int row, int col)
+    { 
+        _buttonBackGround.rectTransform.sizeDelta = new Vector2(4 + (col - 1) * 2 + col * 62, 4 + (row - 1) * 2 + row * 62);
     }
 }
