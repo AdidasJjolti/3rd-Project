@@ -401,6 +401,6 @@ public class MineSweeper : MonoBehaviour
     // height = top padding + down padding + (buttons - 1) * spacing + buttons * buttonsize
     public void SetBackgroundSize(int row, int col)
     { 
-        _buttonBackGround.rectTransform.sizeDelta = new Vector2(4 + (col - 1) * 2 + col * 62, 4 + (row - 1) * 2 + row * 62);
+        _buttonBackGround.rectTransform.sizeDelta = new Vector2(4 + (col - 1) * 30 + col * 62, 4 + (row - 1) * 30 + row * 62);
     }
 }
