@@ -25,7 +25,7 @@ public class MineSweeper : MonoBehaviour
 {
     int _row = 9;
     int _col = 9;
-    int _mines = 20;
+    int _mines = 10;
     int _flags;
 
     [SerializeField] GameObject _button;
@@ -47,6 +47,7 @@ public class MineSweeper : MonoBehaviour
     [SerializeField] Image _buttonBackGround;
 
     private bool _isGameOver;
+    private bool _isVictorious;
 
     void Awake()
     {
@@ -215,7 +216,7 @@ public class MineSweeper : MonoBehaviour
         if (_map[index] == (int)_cellType.MINE && _openMap[index] == true)
         {
             _isGameOver = true;
-            Time.timeScale = 0f;
+            SetGameOver();
             Debug.LogError("Game Over" + " ,Origin : " + origin + " , Index : " + index);
             return;
         }
@@ -270,6 +271,13 @@ public class MineSweeper : MonoBehaviour
                     break;
             }
         }
+
+
+        // ToDo : 게임 승리 조건 구현하기
+        if(CountOpenButtons() + CountFlags() == _row * _col)
+        {
+            SetVictorious();
+        }
     }
 
     public void SetHexToColor(string hexadecimal, TextMeshProUGUI text)
@@ -320,8 +328,17 @@ public class MineSweeper : MonoBehaviour
         {
             return;
         }
-        _curTime += Time.deltaTime;
-        _timerText.text = string.Format($"{_curTime:000}");
+
+        if(_isGameOver == true)
+        {
+            Time.timeScale = 0;
+        }
+        else
+        {
+            Time.timeScale = 1;
+            _curTime += Time.deltaTime;
+            _timerText.text = string.Format($"{_curTime:000}");
+        }
     }
 
     public void ChangeFaceSprite(bool onPress)
@@ -367,6 +384,7 @@ public class MineSweeper : MonoBehaviour
         _flags++;
     }
 
+    // ToDo : 난이도 세팅은 보류
     public void SetNewGame((eDifficultyType difficulty, (int col, int row, int mine)info)data)
     {
         switch(data.difficulty)
@@ -397,10 +415,50 @@ public class MineSweeper : MonoBehaviour
         CreateButtons();
     }
 
+    // 얼굴 버튼을 누르면 9x9 새 게임으로 초기화
+    public void SetEasyGame()
+    {
+        GameObject.Find("UICanvas").transform.Find("gameOverUI").gameObject.SetActive(false);
+        Time.timeScale = 1;
+        _isGameOver = false;
+        _curTime = 0f;
+        _isFirstClick = false;
+        _timerText.text = "000";
+        SetBackgroundSize(9, 9);
+        SetMines();
+        CreateButtons();
+
+    }
+
     // width = left padding + right padding + (buttons - 1) * spacing + buttons * buttonsize
     // height = top padding + down padding + (buttons - 1) * spacing + buttons * buttonsize
     public void SetBackgroundSize(int row, int col)
     { 
         _buttonBackGround.rectTransform.sizeDelta = new Vector2(4 + (col - 1) * 30 + col * 62, 4 + (row - 1) * 30 + row * 62);
+    }
+
+    // 게임 종료 후 게임 오버 UI 활성화, 게임 오버 UI에서 SetEasyGame을 호출하는 버튼 생성
+    void SetGameOver()
+    {
+        Time.timeScale = 0;
+        GameObject.Find("UICanvas").transform.Find("gameOverUI").gameObject.SetActive(true);
+    }
+
+    // 게임 승리 조건 : _flags = 0이고 open 버튼이 _row*_col - _mines = 71일 때
+    void SetVictorious()
+    {
+        Debug.Log("Victorious!");
+    }
+
+    // open 상태인 버튼 갯수를 가져오는 함수, CountFlags 함수의 리턴값과의 합이 _row*_col이면 승리 판정
+    int CountOpenButtons()
+    {
+        return 0;
+    }
+
+    // 맵에 표시한 깃발 갯수를 가져오는 함수,
+    int CountFlags()
+    {
+        return 0;
     }
 }
