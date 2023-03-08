@@ -273,8 +273,7 @@ public class MineSweeper : MonoBehaviour
         }
 
 
-        // ToDo : 게임 승리 조건 구현하기
-        if(CountOpenButtons() + CountFlags() == _row * _col)
+        if(CountOpenButtons() == _row * _col - _mines)
         {
             SetVictorious();
         }
@@ -329,7 +328,7 @@ public class MineSweeper : MonoBehaviour
             return;
         }
 
-        if(_isGameOver == true)
+        if(_isGameOver == true || _isVictorious == true)
         {
             Time.timeScale = 0;
         }
@@ -418,12 +417,15 @@ public class MineSweeper : MonoBehaviour
     // 얼굴 버튼을 누르면 9x9 새 게임으로 초기화
     public void SetEasyGame()
     {
-        GameObject.Find("UICanvas").transform.Find("gameOverUI").gameObject.SetActive(false);
+        //GameObject.Find("UICanvas").transform.Find("gameOverUI").gameObject.SetActive(false);
+        //GameObject.Find("UICanvas").transform.Find("victoryUI").gameObject.SetActive(false);
         Time.timeScale = 1;
         _isGameOver = false;
+        _isVictorious = false;
         _curTime = 0f;
         _isFirstClick = false;
         _timerText.text = "000";
+        _faceImage.sprite = _faceSprites[0];
         SetBackgroundSize(9, 9);
         SetMines();
         CreateButtons();
@@ -438,27 +440,63 @@ public class MineSweeper : MonoBehaviour
     }
 
     // 게임 종료 후 게임 오버 UI 활성화, 게임 오버 UI에서 SetEasyGame을 호출하는 버튼 생성
+    // ToDo : 모든 지뢰 버튼에 폭탄 이미지 표시
     void SetGameOver()
     {
-        Time.timeScale = 0;
-        GameObject.Find("UICanvas").transform.Find("gameOverUI").gameObject.SetActive(true);
+        _faceImage.sprite = _faceSprites[3];
+        RevealMines();
+        //GameObject.Find("UICanvas").transform.Find("gameOverUI").gameObject.SetActive(true);
     }
 
     // 게임 승리 조건 : _flags = 0이고 open 버튼이 _row*_col - _mines = 71일 때
     void SetVictorious()
     {
         Debug.Log("Victorious!");
+        _isVictorious = true;
+        _faceImage.sprite = _faceSprites[2];
+        //GameObject.Find("UICanvas").transform.Find("victoryUI").gameObject.SetActive(true);
     }
 
-    // open 상태인 버튼 갯수를 가져오는 함수, CountFlags 함수의 리턴값과의 합이 _row*_col이면 승리 판정
+    // open 상태인 버튼 갯수를 가져오는 함수, CountFlags 함수의 리턴값과의 합이 _row * _col이면 승리 판정
     int CountOpenButtons()
     {
-        return 0;
+        int opens = 0;
+        for(int i = 0; i <_row * _col; i++)
+        {
+            if(_openMap[i] == true)
+            {
+                opens++;
+            }
+        }
+        return opens;
     }
 
-    // 맵에 표시한 깃발 갯수를 가져오는 함수,
-    int CountFlags()
+    // 게임 오버 되었을 때 지뢰 버튼에 폭탄 이미지를 표시하는 함수
+    // 깃발이 표시된 경우 깃발 이미지를 off하고 폭탄 이미지를 표시
+    // ToDo : 지뢰가 아닌 곳에 깃발이 있는 경우 깃발 이미지를 off하고 X 이미지를 표시
+    void RevealMines()
     {
-        return 0;
+        for(int i = 0; i <_row * _col; i ++)
+        {
+            if(_map[i] == (int)_cellType.MINE)
+            {
+                _buttonList[i].SendMessage("SetBomb");
+            }
+        }
+
     }
+
+    // 맵에 표시한 깃발 갯수를 가져오는 함수, CountOpenButtons 함수의 리턴값과의 합이 _row * _col이면 승리 판정
+    //int CountFlags()
+    //{
+    //    int flags = 0;
+    //    for (int i = 0; i < _row * _col; i++)
+    //    {
+    //        if (_flagMap[i] == true)
+    //        {
+    //            flags++;
+    //        }
+    //    }
+    //    return flags;
+    //}
 }
