@@ -11,6 +11,7 @@ public class ButtonUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     GameObject target;      // 메시지를 전달할 게임 오브젝트 : minesweeper
     [SerializeField] Image _flagImage;
     [SerializeField] Image _bombImage;
+    [SerializeField] Image _xImage;
 
     public void OnPointerDown(PointerEventData eventData)
     {
@@ -46,5 +47,10 @@ public class ButtonUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
         _flagImage.gameObject.SetActive(false);
         _bombImage.gameObject.SetActive(true);
+    }
+
+    public void SetX()
+    {
+        _xImage.gameObject.SetActive(true);
     }
 }

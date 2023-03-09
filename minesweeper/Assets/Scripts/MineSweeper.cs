@@ -82,12 +82,15 @@ public class MineSweeper : MonoBehaviour
         for (int i = 0; i < (_row * _col); i++)
         {
             GameObject objButton = Instantiate(_button);
-            if(_map[i] == (int)_cellType.MINE)
-            {
-                ColorBlock cb = objButton.GetComponent<Button>().colors;
-                cb.normalColor = new Color(1, 0, 0);
-                objButton.GetComponent<Button>().colors = cb;
-            }
+
+            // 지뢰 버튼 색깔을 빨간색으로 변경하여 디버그하기 쉽도록 임시 적용
+            //if(_map[i] == (int)_cellType.MINE)
+            //{
+            //    ColorBlock cb = objButton.GetComponent<Button>().colors;
+            //    cb.normalColor = new Color(1, 0, 0);
+            //    objButton.GetComponent<Button>().colors = cb;
+            //}
+
             objButton.GetComponent<ButtonUI>().SetTarget(gameObject);
             objButton.transform.parent = _buttonParent;
             objButton.transform.name = $"button[{i}]";
@@ -445,6 +448,7 @@ public class MineSweeper : MonoBehaviour
     {
         _faceImage.sprite = _faceSprites[3];
         RevealMines();
+        RevealX();
         //GameObject.Find("UICanvas").transform.Find("gameOverUI").gameObject.SetActive(true);
     }
 
@@ -473,7 +477,6 @@ public class MineSweeper : MonoBehaviour
 
     // 게임 오버 되었을 때 지뢰 버튼에 폭탄 이미지를 표시하는 함수
     // 깃발이 표시된 경우 깃발 이미지를 off하고 폭탄 이미지를 표시
-    // ToDo : 지뢰가 아닌 곳에 깃발이 있는 경우 깃발 이미지를 off하고 X 이미지를 표시
     void RevealMines()
     {
         for(int i = 0; i <_row * _col; i ++)
@@ -483,20 +486,17 @@ public class MineSweeper : MonoBehaviour
                 _buttonList[i].SendMessage("SetBomb");
             }
         }
-
     }
 
-    // 맵에 표시한 깃발 갯수를 가져오는 함수, CountOpenButtons 함수의 리턴값과의 합이 _row * _col이면 승리 판정
-    //int CountFlags()
-    //{
-    //    int flags = 0;
-    //    for (int i = 0; i < _row * _col; i++)
-    //    {
-    //        if (_flagMap[i] == true)
-    //        {
-    //            flags++;
-    //        }
-    //    }
-    //    return flags;
-    //}
+    // ToDo : 지뢰가 아닌 곳에 깃발이 있는 경우 깃발 이미지를 off하고 X 이미지를 표시
+    void RevealX()
+    {
+        for (int i = 0; i < _row * _col; i++)
+        {
+            if (_map[i] != (int)_cellType.MINE && _flagMap[i] == true)
+            {
+                _buttonList[i].SendMessage("SetX");
+            }
+        }
+    }
 }
